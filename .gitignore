@@ -1,0 +1,8 @@
+# Fișierele cu chei și setări locale nu se publică niciodată
+.env*
+!.env.example
+.vercel
+node_modules/
+.next/
+.data/
+*.log
