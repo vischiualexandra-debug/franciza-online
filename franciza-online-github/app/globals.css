@@ -610,16 +610,7 @@ fieldset.choice { border: 0; padding: 0; }
   /* tabla iese din .wrap pe ecrane mari, ca toate 7 coloane să încapă */
   width: min(100vw - 32px, 1800px); position: relative; left: 50%; transform: translateX(-50%);
 }
-/* Pe laptop și calculator: toate 7 coloanele se văd deodată, fără derulare */
-@media (min-width: 1000px) {
-  .board { grid-auto-flow: row; grid-template-columns: repeat(7, minmax(0, 1fr)); overflow-x: visible; }
-  .board-col { padding: 8px; }
-  .board-head { font-size: .8rem; align-items: flex-start; min-width: 0; overflow-wrap: anywhere; }
-  .board-head .count { flex-shrink: 0; }
-  .board-card { padding: 8px 9px; }
-  .board-card .lead-name { font-size: .92rem; overflow-wrap: anywhere; }
-  .board-card .lead-phone, .board-meta { font-size: .76rem; }
-}
+
 .board-col { background: #eaf0f3; border: 2px solid transparent; border-top: 4px solid var(--stg-cereri); border-radius: 14px; padding: 10px; min-height: 160px; transition: border-color .15s, background .15s; }
 .board-col.over { border-color: var(--brand-bright); background: var(--brand-soft); }
 .stg-col-discutie { border-top-color: var(--stg-discutie); }
@@ -667,3 +658,14 @@ fieldset.choice { border: 0; padding: 0; }
 .history-what { font-weight: 600; }
 .details-pair { display: contents; }
 .field select.search { width: 100%; }
+
+/* Pe laptop și calculator: toate 7 coloanele se văd deodată, fără derulare */
+@media (min-width: 1000px) {
+  .board { grid-auto-flow: row; grid-template-columns: repeat(7, minmax(0, 1fr)); overflow-x: visible; }
+  .board-col { padding: 8px; }
+  .board-head { font-size: .8rem; align-items: flex-start; min-width: 0; overflow-wrap: anywhere; }
+  .board-head .count { flex-shrink: 0; }
+  .board-card { padding: 8px 9px; }
+  .board-card .lead-name { font-size: .92rem; overflow-wrap: anywhere; }
+  .board-card .lead-phone, .board-meta { font-size: .76rem; }
+}
