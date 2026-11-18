@@ -6,13 +6,14 @@ import { STAGES, NOTES_MAX } from '@/lib/form';
 import { optionLabel } from '@/lib/i18n';
 import { sourceText, sourceLabels } from '@/lib/source';
 import TeamPanel, { MeModal } from './TeamPanel';
+import PaymentsPanel from './PaymentsPanel';
 
 const LOCALES = { ro: 'ro-RO', ru: 'ru-RU', en: 'en-GB' };
 
 export default function AdminApp({ me }) {
   const { t, lang } = useI18n();
   const isAdminRole = me?.role === 'admin';
-  const [view, setView] = useState('leads'); // leads | team
+  const [view, setView] = useState('leads'); // leads | payments | team
   const [pendingCount, setPendingCount] = useState(0);
   const [meOpen, setMeOpen] = useState(false);
 
@@ -43,17 +44,21 @@ export default function AdminApp({ me }) {
   const srcText = (l) => (l.source ? sourceText(l.source, l.utm, srcLabels) : '—');
   const [toast, setToast] = useState('');
 
+  // fmt(iso) → „18.11.2026, 15:32”; fmt('2026-11-30', true) → „30.11.2026” (doar data, fără fus orar)
   const fmt = useCallback(
-    (iso) =>
-      iso
-        ? new Intl.DateTimeFormat(LOCALES[lang], {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-          }).format(new Date(iso))
-        : '—',
+    (iso, dateOnly = false) => {
+      if (!iso) return '—';
+      if (dateOnly && /^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+        const [y, m, d] = iso.split('-').map(Number);
+        return new Intl.DateTimeFormat(LOCALES[lang], { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(y, m - 1, d));
+      }
+      return new Intl.DateTimeFormat(LOCALES[lang], {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        ...(dateOnly ? {} : { hour: '2-digit', minute: '2-digit' }),
+      }).format(new Date(iso));
+    },
     [lang]
   );
 
@@ -202,20 +207,25 @@ export default function AdminApp({ me }) {
       </header>
 
       <main className="wrap admin-main">
-        {isAdminRole && (
-          <nav className="view-tabs" aria-label="Admin">
-            <button className={view === 'leads' ? 'on' : ''} onClick={() => setView('leads')}>
-              📋 {t('a_tab_leads')}
-            </button>
+        <nav className="view-tabs" aria-label="Admin">
+          <button className={view === 'leads' ? 'on' : ''} onClick={() => setView('leads')}>
+            📋 {t('a_tab_leads')}
+          </button>
+          <button className={view === 'payments' ? 'on' : ''} onClick={() => setView('payments')}>
+            💳 {t('a_tab_payments')}
+          </button>
+          {isAdminRole && (
             <button className={view === 'team' ? 'on' : ''} onClick={() => setView('team')}>
               👥 {t('a_tab_team')}
               {pendingCount > 0 && <span className="pending-dot">{pendingCount}</span>}
             </button>
-          </nav>
-        )}
+          )}
+        </nav>
 
         {view === 'team' && isAdminRole ? (
           <TeamPanel me={me} fmt={fmt} onChanged={loadPending} />
+        ) : view === 'payments' ? (
+          <PaymentsPanel t={t} lang={lang} fmt={fmt} leads={leads} />
         ) : (
         <>
         <div className="toolbar">

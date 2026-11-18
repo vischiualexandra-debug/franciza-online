@@ -225,3 +225,82 @@ export async function deleteUser(id) {
   await writeLocal(USERS, rows.filter((u) => u.id !== id));
   return true;
 }
+
+// =============================== DOCUMENTE (originale) ===============================
+// Bucket privat „documents” în Supabase Storage (vezi supabase/005_documents.sql).
+// Local, fără Supabase, fișierele stau în .data/documents/.
+const BUCKET = 'documents';
+const localDoc = (p) => path.join(process.cwd(), '.data', 'documents', p.replace(/[^\w./-]/g, '_'));
+
+export async function saveDocument(filePath, buffer, contentType) {
+  if (dbMode() === 'supabase') {
+    const { error } = await supabase().storage.from(BUCKET).upload(filePath, buffer, { contentType, upsert: false });
+    if (error) throw new Error(error.message);
+    return filePath;
+  }
+  await fs.mkdir(path.dirname(localDoc(filePath)), { recursive: true });
+  await fs.writeFile(localDoc(filePath), buffer);
+  return filePath;
+}
+
+export async function deleteDocument(filePath) {
+  if (dbMode() === 'supabase') {
+    await supabase().storage.from(BUCKET).remove([filePath]);
+    return;
+  }
+  await fs.unlink(localDoc(filePath)).catch(() => {});
+}
+
+// Link temporar (5 minute) spre original — doar pentru admin logat (verificarea e în ruta API).
+export async function documentLink(filePath) {
+  if (dbMode() === 'supabase') {
+    const { data, error } = await supabase().storage.from(BUCKET).createSignedUrl(filePath, 300);
+    if (error) throw new Error(error.message);
+    return { url: data.signedUrl };
+  }
+  return { buffer: await fs.readFile(localDoc(filePath)) };
+}
+
+// =============================== PLĂȚI ===============================
+const PAYMENTS = 'payments';
+
+export async function insertPayment(payment) {
+  if (dbMode() === 'supabase') {
+    return must(await supabase().from(PAYMENTS).insert(payment).select().single());
+  }
+  const rows = await readLocal(PAYMENTS);
+  const row = { id: nextId(rows), created_at: new Date().toISOString(), status: 'unpaid', paid_at: null, paid_by: null, ...payment };
+  rows.push(row);
+  await writeLocal(PAYMENTS, rows);
+  return row;
+}
+
+export async function listPayments() {
+  if (dbMode() === 'supabase') {
+    return must(await supabase().from(PAYMENTS).select('*').order('due_date', { ascending: true }).limit(1000));
+  }
+  return (await readLocal(PAYMENTS)).sort((a, b) => String(a.due_date).localeCompare(String(b.due_date)));
+}
+
+export async function getPayment(id) {
+  if (dbMode() === 'supabase') {
+    return must(await supabase().from(PAYMENTS).select('*').eq('id', id).maybeSingle());
+  }
+  return (await readLocal(PAYMENTS)).find((p) => p.id === id) || null;
+}
+
+export async function setPaymentStatus(id, status, byName) {
+  const patch =
+    status === 'paid'
+      ? { status, paid_at: new Date().toISOString(), paid_by: byName }
+      : { status, paid_at: null, paid_by: null };
+  if (dbMode() === 'supabase') {
+    return must(await supabase().from(PAYMENTS).update(patch).eq('id', id).select().maybeSingle());
+  }
+  const rows = await readLocal(PAYMENTS);
+  const row = rows.find((p) => p.id === id);
+  if (!row) return null;
+  Object.assign(row, patch);
+  await writeLocal(PAYMENTS, rows);
+  return row;
+}

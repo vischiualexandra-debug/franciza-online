@@ -37,6 +37,20 @@ Rulează o dată [`supabase/004_crm.sql`](supabase/004_crm.sql) în Supabase →
 - În fișa clientului: nume, telefon, sursa, data creării, **notițe** și **istoricul etapelor** (de la → la, data, cine a mutat).
 - Istoricul e în tabelul `lead_history`; cererile vechi au primit automat primul rând (cu data lor reală).
 
+## Plăți: contracte și facturi recunoscute de Claude (ДЗ №2, punctul 2)
+
+1. Rulează o dată [`supabase/005_payments.sql`](supabase/005_payments.sql) (tabelul `payments` + bucket-ul privat `documents`).
+2. Pe https://console.anthropic.com → **API Keys** creează o cheie și pune-o în Vercel → Environment Variables ca
+   `ANTHROPIC_API_KEY`. În **Billing → Limits** setează o limită lunară de cheltuieli.
+3. `/admin` → **💳 Plăți** → **Încarcă contract / factură**: poză de pe telefon (se micșorează în browser) sau PDF până la 4 MB.
+   Serverul trimite fișierul la Claude (cheia nu ajunge în browser), Claude întoarce contragentul, numărul și data,
+   suma și valuta, termenul de plată și direcția (ne plătește francizatul / plătim noi).
+4. **Ecranul de verificare**: documentul în stânga, câmpurile în dreapta, toate se pot corecta; se poate lega de
+   francizatul din CRM. Abia la „Salvează plata” originalul urcă în Storage și plata intră în lista **De plată**.
+5. Dacă fișierul nu e un contract / o factură (o poză oarecare), apare un mesaj clar și **nu se salvează nimic**.
+6. În listă: sume de încasat / de plătit, **întârziate (evidențiate cu roșu)**, achitate luna aceasta;
+   butonul **Original** deschide documentul printr-un link temporar (5 minute), doar pentru cine e logat.
+
 ## Conturile echipei
 
 - **Prima intrare:** pe `/admin/login` scrii emailul tău și parola din `ADMIN_PASSWORD` (Vercel).

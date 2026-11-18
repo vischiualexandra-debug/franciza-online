@@ -238,3 +238,53 @@ export const FIELD_ORDER = STEPS.flatMap((s) => s.fields);
 
 // Pasul pe care se află un câmp (pentru a sări la prima eroare).
 export const stepOf = (field) => STEPS.findIndex((s) => s.fields.includes(field));
+
+// =============================== PLĂȚI (contracte / facturi) ===============================
+export const CURRENCIES = ['MDL', 'EUR', 'USD', 'RON'];
+export const DOC_KINDS = ['contract', 'invoice', 'act', 'other'];
+export const DIRECTIONS = ['in', 'out'];
+
+const isDate = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v) && !isNaN(Date.parse(v));
+
+// Câmpurile de pe ecranul de verificare, după ce omul le-a corectat.
+export function validatePayment(input = {}) {
+  const errors = {};
+  const data = {};
+
+  const counterparty = line(input.counterparty);
+  if (!counterparty) errors.counterparty = 'err_required';
+  else if (counterparty.length < 2) errors.counterparty = 'err_name_short';
+  else if (counterparty.length > 200) errors.counterparty = 'err_too_long';
+  data.counterparty = counterparty;
+
+  // „1 500,50” / „1500.5” → 1500.5
+  const amountStr = line(String(input.amount ?? '')).replace(/\s/g, '').replace(',', '.');
+  const amount = Number(amountStr);
+  if (!amountStr) errors.amount = 'err_required';
+  else if (!/^\d+(\.\d{1,2})?$/.test(amountStr) || !(amount > 0) || amount > 9999999999) errors.amount = 'err_amount';
+  data.amount = errors.amount ? null : amount;
+
+  data.currency = CURRENCIES.includes(input.currency) ? input.currency : 'MDL';
+  data.doc_kind = DOC_KINDS.includes(input.doc_kind) ? input.doc_kind : 'other';
+  data.direction = DIRECTIONS.includes(input.direction) ? input.direction : 'in';
+
+  const docNumber = line(input.doc_number);
+  if (docNumber.length > 60) errors.doc_number = 'err_too_long';
+  data.doc_number = docNumber || null;
+
+  for (const k of ['doc_date', 'due_date']) {
+    const v = line(input[k]);
+    if (v && !isDate(v)) errors[k] = 'err_date';
+    data[k] = v && isDate(v) ? v : null;
+  }
+  if (!data.due_date && !errors.due_date) errors.due_date = 'err_required';
+
+  const description = text(input.description);
+  if (description.length > 500) errors.description = 'err_too_long';
+  data.description = description || null;
+
+  const leadId = Number(input.lead_id);
+  data.lead_id = Number.isInteger(leadId) && leadId > 0 ? leadId : null;
+
+  return { ok: Object.keys(errors).length === 0, errors, data };
+}
