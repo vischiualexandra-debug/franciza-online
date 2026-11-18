@@ -614,7 +614,7 @@ fieldset.choice { border: 0; padding: 0; }
 @media (min-width: 1000px) {
   .board { grid-auto-flow: row; grid-template-columns: repeat(7, minmax(0, 1fr)); overflow-x: visible; }
   .board-col { padding: 8px; }
-  .board-head { font-size: .8rem; align-items: flex-start; min-width: 0; overflow-wrap: anywhere; hyphens: auto; }
+  .board-head { font-size: .8rem; align-items: flex-start; min-width: 0; overflow-wrap: anywhere; }
   .board-head .count { flex-shrink: 0; }
   .board-card { padding: 8px 9px; }
   .board-card .lead-name { font-size: .92rem; overflow-wrap: anywhere; }
