@@ -25,6 +25,18 @@
 
 ---
 
+## CRM: pâlnia de vânzări (ДЗ №2, punctul 1)
+
+Rulează o dată [`supabase/004_crm.sql`](supabase/004_crm.sql) în Supabase → SQL Editor **înainte** de a publica versiunea nouă.
+
+- Cererea de pe site intră singură în CRM pe etapa **Cereri**, cu sursa **Site**.
+- **＋ Adaugă client** în `/admin`: client după un apel / o întâlnire (obligatoriu doar nume și telefon), sursa **Manual**.
+- Etapele: Cereri → Discuție online → Interviu → Înregistrat → Training în parcurgere → Francizat activ, plus **Respins**.
+- **Pâlnie**: tablă cu coloane; cardul se trage în altă coloană (pe telefon: deschizi cardul și alegi etapa).
+  **Listă**: aceleași carduri, cu filtru pe etapă.
+- În fișa clientului: nume, telefon, sursa, data creării, **notițe** și **istoricul etapelor** (de la → la, data, cine a mutat).
+- Istoricul e în tabelul `lead_history`; cererile vechi au primit automat primul rând (cu data lor reală).
+
 ## Conturile echipei
 
 - **Prima intrare:** pe `/admin/login` scrii emailul tău și parola din `ADMIN_PASSWORD` (Vercel).

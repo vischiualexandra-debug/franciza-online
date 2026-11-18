@@ -54,16 +54,78 @@ const nextId = (rows) => rows.reduce((m, r) => Math.max(m, r.id), 0) + 1;
 
 // =============================== CERERI ===============================
 
-// lead = datele validate din lib/form.js + lang, source, utm
-export async function insertLead(lead) {
+// lead = datele validate din lib/form.js + lang, source, utm (+ origin, stage pentru CRM)
+// Fiecare cerere nouă primește și primul rând în istoric: „creată → prima etapă”.
+export async function insertLead(lead, byName = null) {
+  const values = { origin: 'site', stage: 'cereri', ...lead, status: 'new' };
+  let row;
   if (dbMode() === 'supabase') {
-    return must(await supabase().from(LEADS).insert({ ...lead, status: 'new' }).select().single());
+    row = must(await supabase().from(LEADS).insert(values).select().single());
+  } else {
+    const rows = await readLocal(LEADS);
+    row = { id: nextId(rows), created_at: new Date().toISOString(), updated_at: null, notes: null, ...values };
+    rows.push(row);
+    await writeLocal(LEADS, rows);
+  }
+  await addHistory({ lead_id: row.id, created_at: row.created_at, from_stage: null, to_stage: row.stage, by_name: byName });
+  return row;
+}
+
+// =============================== CRM ===============================
+const HISTORY = 'lead_history';
+
+async function addHistory(entry) {
+  if (dbMode() === 'supabase') {
+    must(await supabase().from(HISTORY).insert(entry));
+    return;
+  }
+  const rows = await readLocal(HISTORY);
+  rows.push({ id: nextId(rows), created_at: new Date().toISOString(), ...entry });
+  await writeLocal(HISTORY, rows);
+}
+
+export async function getLead(id) {
+  if (dbMode() === 'supabase') {
+    return must(await supabase().from(LEADS).select('*').eq('id', id).maybeSingle());
+  }
+  return (await readLocal(LEADS)).find((r) => r.id === id) || null;
+}
+
+async function patchLead(id, patch) {
+  if (dbMode() === 'supabase') {
+    return must(await supabase().from(LEADS).update(patch).eq('id', id).select().maybeSingle());
   }
   const rows = await readLocal(LEADS);
-  const row = { id: nextId(rows), created_at: new Date().toISOString(), updated_at: null, ...lead, status: 'new' };
-  rows.push(row);
+  const row = rows.find((r) => r.id === id);
+  if (!row) return null;
+  Object.assign(row, patch);
   await writeLocal(LEADS, rows);
   return row;
+}
+
+// Mută cardul pe altă etapă și scrie trecerea în istoric (de la → la, data, cine).
+export async function moveLeadStage(id, stage, byName) {
+  const before = await getLead(id);
+  if (!before) return null;
+  if (before.stage === stage) return before;
+  const lead = await patchLead(id, { stage, updated_at: new Date().toISOString(), updated_by: byName });
+  await addHistory({ lead_id: id, from_stage: before.stage, to_stage: stage, by_name: byName });
+  return lead;
+}
+
+export async function updateLeadNotes(id, notes, byName) {
+  return patchLead(id, { notes, updated_at: new Date().toISOString(), updated_by: byName });
+}
+
+export async function listHistory(leadId) {
+  if (dbMode() === 'supabase') {
+    return must(
+      await supabase().from(HISTORY).select('*').eq('lead_id', leadId).order('created_at', { ascending: true })
+    );
+  }
+  return (await readLocal(HISTORY))
+    .filter((h) => h.lead_id === leadId)
+    .sort((a, b) => a.created_at.localeCompare(b.created_at));
 }
 
 export async function listLeads() {

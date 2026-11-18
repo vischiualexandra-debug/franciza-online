@@ -35,7 +35,8 @@ export async function POST(req) {
 
   let lead;
   try {
-    lead = await insertLead({ ...data, lang, source: channel, utm });
+    // origin „site” + prima etapă a pâlniei → cererea apare în CRM, coloana „Cereri”
+    lead = await insertLead({ ...data, lang, source: channel, utm, origin: 'site', stage: 'cereri' });
   } catch (e) {
     console.error('[leads] nu s-a salvat:', e.message);
     return NextResponse.json({ ok: false, error: 'server' }, { status: 500 });

@@ -561,3 +561,99 @@ fieldset.choice { border: 0; padding: 0; }
   .chat-toggle { width: 54px; height: 54px; }
   .footer-bottom { padding-bottom: 84px; }
 }
+
+/* ---------- CRM: pâlnia pe etape ---------- */
+:root {
+  --stg-cereri: #2563eb;
+  --stg-discutie: #0891b2;
+  --stg-interviu: #7c3aed;
+  --stg-inregistrat: #d97706;
+  --stg-training: #ca8a04;
+  --stg-francizat: #16a34a;
+  --stg-respins: #6b7280;
+}
+.stage-tabs { margin-bottom: 14px; }
+.stg-dot-cereri { background: var(--stg-cereri); }
+.stg-dot-discutie { background: var(--stg-discutie); }
+.stg-dot-interviu { background: var(--stg-interviu); }
+.stg-dot-inregistrat { background: var(--stg-inregistrat); }
+.stg-dot-training { background: var(--stg-training); }
+.stg-dot-francizat { background: var(--stg-francizat); }
+.stg-dot-respins { background: var(--stg-respins); }
+
+.lead-row.stg-cereri { border-left-color: var(--stg-cereri); }
+.lead-row.stg-discutie { border-left-color: var(--stg-discutie); }
+.lead-row.stg-interviu { border-left-color: var(--stg-interviu); }
+.lead-row.stg-inregistrat { border-left-color: var(--stg-inregistrat); }
+.lead-row.stg-training { border-left-color: var(--stg-training); }
+.lead-row.stg-francizat { border-left-color: var(--stg-francizat); }
+.lead-row.stg-respins { border-left-color: var(--stg-respins); opacity: .8; }
+
+.badge[class*='stg-badge-'] { color: #fff; }
+.stg-badge-cereri { background: var(--stg-cereri); }
+.stg-badge-discutie { background: var(--stg-discutie); }
+.stg-badge-interviu { background: var(--stg-interviu); }
+.stg-badge-inregistrat { background: var(--stg-inregistrat); }
+.stg-badge-training { background: var(--stg-training); }
+.stg-badge-francizat { background: var(--stg-francizat); }
+.stg-badge-respins { background: var(--stg-respins); }
+
+.org-site { background: #e4f6fd; border-color: #b8e6f8; color: #086a95; }
+.org-manual { background: #fff4e5; border-color: #fbd9a5; color: #8a4b00; }
+.org-telegram { background: #e8f3ff; border-color: #bcdcff; color: #1d5fa8; }
+.org-document { background: #f1ecff; border-color: #d8ccff; color: #5b3cc4; }
+
+.board-hint { margin: -6px 0 10px; }
+.board {
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(230px, 1fr); gap: 12px;
+  overflow-x: auto; padding-bottom: 12px; align-items: start;
+  /* tabla iese din .wrap pe ecrane mari, ca toate 7 coloane să încapă */
+  width: min(100vw - 32px, 1800px); position: relative; left: 50%; transform: translateX(-50%);
+}
+.board-col { background: #eaf0f3; border: 2px solid transparent; border-top: 4px solid var(--stg-cereri); border-radius: 14px; padding: 10px; min-height: 160px; transition: border-color .15s, background .15s; }
+.board-col.over { border-color: var(--brand-bright); background: var(--brand-soft); }
+.stg-col-discutie { border-top-color: var(--stg-discutie); }
+.stg-col-interviu { border-top-color: var(--stg-interviu); }
+.stg-col-inregistrat { border-top-color: var(--stg-inregistrat); }
+.stg-col-training { border-top-color: var(--stg-training); }
+.stg-col-francizat { border-top-color: var(--stg-francizat); }
+.stg-col-respins { border-top-color: var(--stg-respins); }
+.board-head { display: flex; align-items: center; gap: 7px; font-size: .92rem; margin: 2px 2px 10px; }
+.board-head .count { margin-left: auto; background: #fff; }
+.board-cards { display: flex; flex-direction: column; gap: 8px; }
+.board-empty { color: var(--muted); font-size: .85rem; text-align: center; margin: 18px 0; }
+.board-card {
+  display: flex; flex-direction: column; gap: 3px; text-align: left; width: 100%;
+  font: inherit; color: inherit; cursor: grab; background: #fff; border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px 12px; transition: box-shadow .15s, opacity .15s;
+}
+.board-card:hover { box-shadow: var(--shadow); }
+.board-card.dragging { opacity: .45; }
+.board-card .lead-phone { font-size: .85rem; }
+.board-card .lead-tags { margin-top: 4px; }
+.board-meta { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: .78rem; margin-top: 4px; }
+
+/* fișa clientului */
+.crm-modal { max-width: 680px; }
+.crm-sub { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: -4px 0 14px; }
+.stage-pick { position: static; border-top: 0; padding-top: 0; }
+.stage-btns { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; }
+.stage-btn { font-size: .86rem; padding: 8px 6px; }
+.stage-btn.on { color: #fff; }
+.stg-btn-cereri.on { background: var(--stg-cereri); border-color: var(--stg-cereri); }
+.stg-btn-discutie.on { background: var(--stg-discutie); border-color: var(--stg-discutie); }
+.stg-btn-interviu.on { background: var(--stg-interviu); border-color: var(--stg-interviu); }
+.stg-btn-inregistrat.on { background: var(--stg-inregistrat); border-color: var(--stg-inregistrat); }
+.stg-btn-training.on { background: var(--stg-training); border-color: var(--stg-training); }
+.stg-btn-francizat.on { background: var(--stg-francizat); border-color: var(--stg-francizat); }
+.stg-btn-respins.on { background: var(--stg-respins); border-color: var(--stg-respins); }
+.crm-notes textarea { min-height: 80px; }
+.crm-notes-actions { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
+.ok-text { color: var(--ok); font-weight: 600; font-size: .9rem; }
+.crm-h { margin: 6px 0 8px; }
+.history { list-style: none; margin: 0 0 8px; padding: 0 0 0 14px; border-left: 2px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+.history li { position: relative; display: flex; flex-direction: column; }
+.history li::before { content: ''; position: absolute; left: -20px; top: 7px; width: 10px; height: 10px; border-radius: 50%; background: var(--brand); border: 2px solid #fff; }
+.history-what { font-weight: 600; }
+.details-pair { display: contents; }
+.field select.search { width: 100%; }

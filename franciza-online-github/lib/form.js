@@ -3,6 +3,48 @@
 
 export const STATUSES = ['new', 'in_progress', 'closed'];
 
+// CRM: etapele pâlniei (în ordine). „respins” = refuz, e mereu ultima coloană.
+export const STAGES = ['cereri', 'discutie', 'interviu', 'inregistrat', 'training', 'francizat', 'respins'];
+export const FIRST_STAGE = STAGES[0];
+// De unde a intrat clientul în CRM.
+export const ORIGINS = ['site', 'manual', 'telegram', 'document'];
+export const NOTES_MAX = 5000;
+
+// Client adăugat manual în CRM (după un apel / o întâlnire): obligatorii doar numele și telefonul.
+export function validateManual(input = {}) {
+  const errors = {};
+  const data = {};
+  const name = line(input.name);
+  if (!name) errors.name = 'err_required';
+  else if (name.length < LIMITS.nameMin) errors.name = 'err_name_short';
+  else if (name.length > LIMITS.nameMax) errors.name = 'err_too_long';
+  data.name = name;
+
+  // „069…” → +373; „+40 7…” → România; alt „+…” → păstrăm numărul complet
+  const raw = line(input.phone);
+  const cc = raw.startsWith('+')
+    ? PHONE_COUNTRIES.find((c) => raw.replace(/[^\d+]/g, '').startsWith(c.cc))?.cc || PHONE_OTHER
+    : DEFAULT_CC;
+  const ph = normalizePhone(cc, raw);
+  if (ph.error) errors.phone = ph.error;
+  data.phone = ph.phone;
+
+  const email = line(input.email).toLowerCase();
+  if (email && (email.length > 120 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))) errors.email = 'err_email';
+  data.email = email || null;
+
+  const city = line(input.city);
+  if (city.length > LIMITS.cityMax) errors.city = 'err_too_long';
+  data.city = city || null;
+
+  const notes = text(input.notes);
+  if (notes.length > NOTES_MAX) errors.notes = 'err_too_long';
+  data.notes = notes || null;
+
+  data.stage = STAGES.includes(input.stage) ? input.stage : FIRST_STAGE;
+  return { ok: Object.keys(errors).length === 0, errors, data };
+}
+
 // Variantele de răspuns (codurile se salvează în baza de date; textele sunt în lib/i18n.js).
 export const OPTIONS = {
   hours: ['3-4', '7-8'],
